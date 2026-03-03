@@ -284,9 +284,9 @@
     const questions = [
         {
             id: 'participant_name',
-            text: "👋 Welcome! To get started, what is your name? (Optional - press Enter to skip)",
+            text: "👋 Welcome! To get started, what is your name?",
             type: 'text',
-            required: false
+            required: true
         },
         {
             id: 'participant_type',
@@ -305,7 +305,7 @@
         },
         {
             id: 'ecode_engaged',
-            text: "📝 **ECODE SECTION**\n\nI engaged with peers:",
+            text: "📝 <b>ECODE SECTION</b>\n\nI engaged with peers:",
             type: 'agree-disagree',
             required: true
         },
@@ -352,6 +352,9 @@
             required: true
         }
     ];
+
+    let isWaitingForFollowUp = false;
+    let followUpTargetIndex = -1;
 
     // Store collected data
     const collectedData = {
@@ -448,28 +451,81 @@
     }
 
     // Handle user response (called by Send button or option clicks)
-    function handleResponse(customValue = null) {
+    async function handleResponse(customValue = null) {
         const value = (customValue !== null) ? customValue : userInput.value.trim();
-        if (questions[currentQuestionIndex].required && !value && customValue === null) return;
+        const currentQ = questions[currentQuestionIndex];
 
-        // If not required and empty, use "Skipped"
-        const finalValue = (value === "" && !questions[currentQuestionIndex].required) ? "Skipped" : value;
+        if (currentQ.required && !value && customValue === null) return;
+
+        // If not required and empty, use "Skipped" (though most are required now)
+        const finalValue = (value === "" && !currentQ.required) ? "Skipped" : value;
 
         // Add user message
         addMessage(finalValue, 'user');
         userInput.value = '';
+
+        if (isWaitingForFollowUp) {
+            // Save follow-up response
+            collectedData.responses.push({
+                question: "Follow-up for: " + questions[followUpTargetIndex].id,
+                question_id: questions[followUpTargetIndex].id + "_followup",
+                answer: finalValue,
+                timestamp: new Date().toISOString()
+            });
+            isWaitingForFollowUp = false;
+            followUpTargetIndex = -1;
+            currentQuestionIndex++;
+            finishResponseStep();
+            return;
+        }
         
         // Save response
         if (currentQuestionIndex < questions.length) {
             collectedData.responses.push({
-                question: questions[currentQuestionIndex].text.replace(/\*\*/g, '').replace(/\n/g, ' '),
-                question_id: questions[currentQuestionIndex].id,
+                question: currentQ.text.replace(/<b>/g, '').replace(/<\/b>/g, '').replace(/\n/g, ' '),
+                question_id: currentQ.id,
                 answer: finalValue,
                 timestamp: new Date().toISOString()
             });
         }
 
+        // Call LLM evaluation for potential follow-up
+        // Only evaluate if it's a text response or a low rating
+        if (currentQ.type === 'text' || (currentQ.type === 'rating' && parseInt(finalValue) <= 5)) {
+            try {
+                const response = await fetch('/evaluate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        question: currentQ.text,
+                        answer: finalValue,
+                        question_id: currentQ.id
+                    })
+                });
+                const evaluation = await response.json();
+
+                if (evaluation.needs_follow_up && evaluation.follow_up_question) {
+                    isWaitingForFollowUp = true;
+                    followUpTargetIndex = currentQuestionIndex;
+                    setTimeout(() => {
+                        addMessage(evaluation.follow_up_question, 'bot');
+                        userInput.style.display = 'block';
+                        sendBtn.style.display = 'block';
+                        userInput.placeholder = "Tell me more...";
+                        userInput.focus();
+                    }, 500);
+                    return;
+                }
+            } catch (e) {
+                console.error("LLM Evaluation failed:", e);
+            }
+        }
+
         currentQuestionIndex++;
+        finishResponseStep();
+    }
+
+    function finishResponseStep() {
         updateProgress();
 
         // Check if more questions
@@ -571,7 +627,7 @@
     // Initialize
     window.onload = () => {
         setTimeout(() => {
-            addMessage("Hello! 👋 Thank you for attending the **AI Empowerment for Leaders** workshop with Mehul Nanavati. I'd love to hear your feedback—this will help us design even better programs! Let's begin:", 'bot', true);
+            addMessage("Hello! 👋 Thank you for attending the <b>AI Empowerment for Leaders</b> workshop with Mehul Nanavati. I'd love to hear your feedback—this will help us design even better programs! Let's begin:", 'bot', true);
             setTimeout(askNextQuestion, 1200);
         }, 500);
     };

@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workshop Feedback Bot</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .chat-container {
+            width: 100%;
+            max-width: 450px;
+            background-color: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .header-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .header-subtitle {
+            font-size: 0.8rem;
+            opacity: 0.9;
+            width: 100%;
+        }
+
+        .download-btn {
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .download-btn:hover {
+            background-color: #27ae60;
+            transform: translateY(-1px);
+        }
+        .download-btn:disabled {
+            background-color: #95a5a6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            min-height: 400px;
+            max-height: 500px;
+        }
+
+        .message {
+            max-width: 85%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .bot-message {
+            background-color: #f1f3f4;
+            color: #333;
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+        }
+
+        .user-message {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+
+        .options-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .option-btn {
+            background-color: #e8eaf6;
+            border: 2px solid #667eea;
+            color: #667eea;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .option-btn:hover, .option-btn.selected {
+            background-color: #667eea;
+            color: white;
+        }
+
+        .rating-container {
+            display: flex;
+            gap: 4px;
+            margin-top: 8px;
+        }
+
+        .rating-btn {
+            width: 32px;
+            height: 32px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 50%;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .rating-btn:hover, .rating-btn.selected {
+            background: #667eea;
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .agree-disagree {
+            display: flex;
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        .agree-disagree button {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .agree-disagree button:hover,
+        .agree-disagree button.selected {
+            background: #667eea;
+            color: white;
+        }
+
+        .input-area {
+            padding: 15px 20px;
+            border-top: 1px solid #eee;
+            display: flex;
+            gap: 10px;
+            background-color: #fff;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 12px 18px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            outline: none;
+            font-size: 0.95rem;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus {
+            border-color: #667eea;
+        }
+
+        input[type="text"]:disabled {
+            background-color: #f5f5f5;
+            cursor: not-allowed;
+        }
+
+        .send-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .send-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .send-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .progress-indicator {
+            text-align: center;
+            padding: 8px;
+            font-size: 0.8rem;
+            color: #666;
+            background: #f9f9f9;
+            border-bottom: 1px solid #eee;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Mobile responsive */
+        @media (max-width: 480px) {
+            .chat-container {
+                height: 95vh;
+                border-radius: 15px;
+            }
+            .chat-messages {
+                min-height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="chat-container">
+    <div class="chat-header">
+        <div>
+            <div class="header-title">🤖 Workshop Feedback Bot</div>
+            <div class="header-subtitle">AI Empowerment for Leaders • Feb 28, 2026</div>
+        </div>
+        <button class="download-btn" id="downloadBtn" onclick="exportToExcel()" disabled>
+            📥 Save to Excel
+        </button>
+    </div>
+    
+    <div class="progress-indicator" id="progress">Question 1 of 5</div>
+    
+    <div class="chat-messages" id="chat-messages"></div>
+
+    <div class="input-area" id="input-area">
+        <input type="text" id="user-input" placeholder="Type your answer..." autocomplete="off">
+        <button class="send-btn" id="send-btn" onclick="handleResponse()">Send</button>
+    </div>
+</div>
+
+<script>
+    // Questions from the Google Form - adapted for conversation
+    const questions = [
+        {
+            id: 'participant_type',
+            text: "👋 Welcome! First, are you participating as a:",
+            type: 'options',
+            options: ['Member', 'Spouse', 'YNG'],
+            required: true
+        },
+        {
+            id: 'overall_rating',
+            text: "⭐ On a scale of 1-10, how would you rate the overall workshop?",
+            type: 'rating',
+            min: 1,
+            max: 10,
+            required: true
+        },
+        {
+            id: 'eureka_moment',
+            text: "💡 What was your Eureka moment or key learning from the workshop?",
+            type: 'text',
+            required: true
+        },
+        {
+            id: 'future_topics',
+            text: "🔍 What specific topics, challenges, or questions would you like to explore further?",
+            type: 'text',
+            required: true
+        },
+        {
+            id: 'improvements',
+            text: "🎯 If you were organizing this event, what would you do differently?",
+            type: 'text',
+            required: true
+        }
+    ];
+
+    // Store collected data
+    const collectedData = {
+        workshop: "AI Empowerment for Leaders",
+        date: "February 28, 2026",
+        responses: []
+    };
+
+    let currentQuestionIndex = 0;
+    const chatMessages = document.getElementById('chat-messages');
+    const userInput = document.getElementById('user-input');
+    const sendBtn = document.getElementById('send-btn');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const progressIndicator = document.getElementById('progress');
+    const inputArea = document.getElementById('input-area');
+
+    // Add message to chat
+    function addMessage(text, sender, html = false) {
+        const messageDiv = document.createElement('div');
+        messageDiv.classList.add('message', sender === 'bot' ? 'bot-message' : 'user-message');
+        if (html) {
+            messageDiv.innerHTML = text;
+        } else {
+            messageDiv.textContent = text;
+        }
+        chatMessages.appendChild(messageDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    // Show options buttons for multiple choice
+    function showOptions(options, onSelect) {
+        const container = document.createElement('div');
+        container.className = 'options-container';
+        
+        options.forEach(option => {
+            const btn = document.createElement('button');
+            btn.className = 'option-btn';
+            btn.textContent = option;
+            btn.onclick = () => {
+                // Remove selected class from all
+                container.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+                btn.classList.add('selected');
+                onSelect(option);
+            };
+            container.appendChild(btn);
+        });
+        
+        addMessage('', 'bot', true);
+        chatMessages.lastChild.appendChild(container);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    // Show rating buttons (1-10)
+    function showRating(min, max, onSelect) {
+        const container = document.createElement('div');
+        container.className = 'rating-container';
+        
+        for (let i = min; i <= max; i++) {
+            const btn = document.createElement('button');
+            btn.className = 'rating-btn';
+            btn.textContent = i;
+            btn.onclick = () => {
+                container.querySelectorAll('.rating-btn').forEach(b => b.classList.remove('selected'));
+                btn.classList.add('selected');
+                onSelect(i);
+            };
+            container.appendChild(btn);
+        }
+        
+        addMessage('', 'bot', true);
+        chatMessages.lastChild.appendChild(container);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    // Show Agree/Disagree buttons
+    function showAgreeDisagree(onSelect) {
+        const container = document.createElement('div');
+        container.className = 'agree-disagree';
+        
+        ['Agree', 'Disagree'].forEach(choice => {
+            const btn = document.createElement('button');
+            btn.textContent = choice;
+            btn.onclick = () => {
+                container.querySelectorAll('button').forEach(b => b.classList.remove('selected'));
+                btn.classList.add('selected');
+                onSelect(choice);
+            };
+            container.appendChild(btn);
+        });
+        
+        addMessage('', 'bot', true);
+        chatMessages.lastChild.appendChild(container);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    // Handle user response (called by Send button or option clicks)
+    function handleResponse(customValue = null) {
+        const value = customValue !== null ? customValue : userInput.value.trim();
+        if (!value && customValue === null) return;
+
+        // Add user message
+        addMessage(value, 'user');
+        userInput.value = '';
+        
+        // Save response
+        if (currentQuestionIndex < questions.length) {
+            collectedData.responses.push({
+                question: questions[currentQuestionIndex].text,
+                question_id: questions[currentQuestionIndex].id,
+                answer: value,
+                timestamp: new Date().toISOString()
+            });
+        }
+
+        currentQuestionIndex++;
+        updateProgress();
+
+        // Check if more questions
+        if (currentQuestionIndex < questions.length) {
+            setTimeout(() => askNextQuestion(), 500);
+        } else {
+            // End of survey
+            setTimeout(() => {
+                addMessage("🎉 Thank you so much for your valuable feedback! Your insights help us create better experiences. The data has been saved and you can download it anytime using the button above.", 'bot');
+                downloadBtn.disabled = false;
+                // Disable input
+                userInput.disabled = true;
+                sendBtn.disabled = true;
+                console.log("Collected Feedback:", collectedData);
+            }, 500);
+        }
+    }
+
+    // Ask the next question based on type
+    function askNextQuestion() {
+        const q = questions[currentQuestionIndex];
+        updateProgress();
+        addMessage(q.text, 'bot');
+
+        if (q.type === 'options') {
+            showOptions(q.options, (selected) => handleResponse(selected));
+            userInput.style.display = 'none';
+            sendBtn.style.display = 'none';
+        } else if (q.type === 'rating') {
+            showRating(q.min, q.max, (selected) => handleResponse(selected));
+            userInput.style.display = 'none';
+            sendBtn.style.display = 'none';
+        } else if (q.type === 'agree-disagree') {
+            showAgreeDisagree((selected) => handleResponse(selected));
+            userInput.style.display = 'none';
+            sendBtn.style.display = 'none';
+        } else {
+            // Text input
+            userInput.style.display = 'block';
+            sendBtn.style.display = 'block';
+            userInput.placeholder = "Type your answer...";
+            userInput.focus();
+        }
+    }
+
+    // Update progress indicator
+    function updateProgress() {
+        progressIndicator.textContent = `Question ${currentQuestionIndex + 1} of ${questions.length}`;
+    }
+
+    // Export to Excel (CSV format)
+    function exportToExcel() {
+        if (collectedData.responses.length === 0) {
+            alert("No feedback collected yet!");
+            return;
+        }
+
+        // CSV Header with metadata
+        let csv = "data:text/csv;charset=utf-8,\uFEFF"; // BOM for Excel UTF-8
+        csv += "Workshop Feedback Export\n";
+        csv += `Workshop,${collectedData.workshop}\n`;
+        csv += `Date,${collectedData.date}\n`;
+        csv += `Exported,${new Date().toLocaleString()}\n`;
+        csv += "\n";
+        csv += "Question ID,Question,Answer,Timestamp\n";
+
+        // Add each response
+        collectedData.responses.forEach(row => {
+            const safeQ = '"' + (row.question_id || '').replace(/"/g, '""') + '"';
+            const safeText = '"' + (row.question || '').replace(/"/g, '""') + '"';
+            const safeAns = '"' + (row.answer || '').replace(/"/g, '""') + '"';
+            const safeTime = '"' + (row.timestamp || '').replace(/"/g, '""') + '"';
+            csv += `${safeQ},${safeText},${safeAns},${safeTime}\n`;
+        });
+
+        // Create download
+        const encodedUri = encodeURI(csv);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        const fileName = `feedback_${collectedData.workshop.replace(/\s+/g, '_')}_${new Date().toISOString().slice(0,10)}.csv`;
+        link.setAttribute("download", fileName);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        // Visual feedback
+        const originalText = downloadBtn.innerHTML;
+        downloadBtn.innerHTML = "✅ Saved!";
+        setTimeout(() => downloadBtn.innerHTML = originalText, 2000);
+    }
+
+    // Enter key support
+    userInput.addEventListener("keypress", (e) => {
+        if (e.key === "Enter" && !userInput.disabled) {
+            handleResponse();
+        }
+    });
+
+    // Initialize
+    window.onload = () => {
+        setTimeout(() => {
+            addMessage("Hello! 👋 Thank you for attending the **AI Empowerment for Leaders** workshop with Mehul Nanavati. I'd love to hear your feedback—this will help us design even better programs! Let's begin:", 'bot', true);
+            setTimeout(askNextQuestion, 1500);
+        }, 500);
+    };
+</script>
+
+</body>
+</html>

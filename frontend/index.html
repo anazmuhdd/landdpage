@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Empowerment Workshop - Feedback Survey</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">🚀 AI Empowerment</div>
+            <h1>Workshop Feedback Survey</h1>
+            <p class="subtitle">Thank you for attending the workshop with <strong>Mehul Nanavati</strong> on <strong>February 28, 2026</strong></p>
+        </header>
+
+        <!-- Progress Bar -->
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar"></div>
+            <span class="progress-text" id="progressText">Question 1 of 10</span>
+        </div>
+
+        <!-- Chat Container -->
+        <div class="chat-container" id="chatContainer">
+            <!-- Welcome Message -->
+            <div class="message bot-message welcome">
+                <div class="avatar">🤖</div>
+                <div class="message-content">
+                    <p>Hello! I'm here to collect your feedback about the AI Empowerment for Leaders workshop. I'll guide you through a few questions about your experience.</p>
+                    <p>Let's begin when you're ready! Your feedback helps us design better future programs. 🎯</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Typing Indicator -->
+        <div class="typing-indicator" id="typingIndicator" style="display: none;">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+
+        <!-- Input Area -->
+        <div class="input-container" id="inputContainer">
+            <div class="input-wrapper">
+                <!-- Rating Buttons (for rating questions) -->
+                <div class="rating-buttons" id="ratingButtons" style="display: none;">
+                    <button class="rating-btn" data-value="1">1</button>
+                    <button class="rating-btn" data-value="2">2</button>
+                    <button class="rating-btn" data-value="3">3</button>
+                    <button class="rating-btn" data-value="4">4</button>
+                    <button class="rating-btn" data-value="5">5</button>
+                </div>
+                
+                <!-- Text Input -->
+                <textarea 
+                    id="userInput" 
+                    placeholder="Type your answer here..." 
+                    rows="1"
+                    style="display: none;"
+                ></textarea>
+                
+                <!-- Skip Button (for optional questions) -->
+                <button class="skip-btn" id="skipBtn" style="display: none;">Skip</button>
+                
+                <!-- Send Button -->
+                <button class="send-btn" id="sendBtn" style="display: none;">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="22" y1="2" x2="11" y2="13"></line>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Completion Screen -->
+        <div class="completion-screen" id="completionScreen" style="display: none;">
+            <div class="completion-content">
+                <div class="success-icon">✅</div>
+                <h2>Thank You!</h2>
+                <p>Your feedback has been successfully recorded. We appreciate your time and valuable insights!</p>
+                <button class="restart-btn" onclick="location.reload()">Submit Another Response</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

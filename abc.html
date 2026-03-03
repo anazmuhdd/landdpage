@@ -262,7 +262,7 @@
     <div class="chat-header">
         <div>
             <div class="header-title">🤖 Workshop Feedback Bot</div>
-            <div class="header-subtitle">AI Empowerment for Leaders • Feb 28, 2026</div>
+            <div class="header-subtitle">AI Empowerment for Leaders • Mehul Nanavati • Feb 28, 2026</div>
         </div>
         <button class="download-btn" id="downloadBtn" onclick="exportToExcel()" disabled>
             📥 Save to Excel
@@ -283,18 +283,54 @@
     // Questions from the Google Form - adapted for conversation
     const questions = [
         {
+            id: 'participant_name',
+            text: "👋 Welcome! To get started, what is your name? (Optional - press Enter to skip)",
+            type: 'text',
+            required: false
+        },
+        {
             id: 'participant_type',
-            text: "👋 Welcome! First, are you participating as a:",
+            text: "Are you participating as a:",
             type: 'options',
             options: ['Member', 'Spouse', 'YNG'],
             required: true
         },
         {
             id: 'overall_rating',
-            text: "⭐ On a scale of 1-10, how would you rate the overall workshop?",
+            text: "⭐ On a scale of 1-10 (1: lowest, 10: highest), how would you rate the overall workshop?",
             type: 'rating',
             min: 1,
             max: 10,
+            required: true
+        },
+        {
+            id: 'ecode_engaged',
+            text: "📝 **ECODE SECTION**\n\nI engaged with peers:",
+            type: 'agree-disagree',
+            required: true
+        },
+        {
+            id: 'ecode_compelling',
+            text: "The content shared was compelling:",
+            type: 'agree-disagree',
+            required: true
+        },
+        {
+            id: 'ecode_open_ideas',
+            text: "I was open to new ideas and perspectives:",
+            type: 'agree-disagree',
+            required: true
+        },
+        {
+            id: 'ecode_value',
+            text: "I feel the experience delivered value:",
+            type: 'agree-disagree',
+            required: true
+        },
+        {
+            id: 'ecode_resource',
+            text: "I found this to be an extraordinary resource:",
+            type: 'agree-disagree',
             required: true
         },
         {
@@ -311,7 +347,7 @@
         },
         {
             id: 'improvements',
-            text: "🎯 If you were organizing this event, what would you do differently?",
+            text: "🎯 If you were in charge of the event, what would you do or do differently?",
             type: 'text',
             required: true
         }
@@ -413,19 +449,22 @@
 
     // Handle user response (called by Send button or option clicks)
     function handleResponse(customValue = null) {
-        const value = customValue !== null ? customValue : userInput.value.trim();
-        if (!value && customValue === null) return;
+        const value = (customValue !== null) ? customValue : userInput.value.trim();
+        if (questions[currentQuestionIndex].required && !value && customValue === null) return;
+
+        // If not required and empty, use "Skipped"
+        const finalValue = (value === "" && !questions[currentQuestionIndex].required) ? "Skipped" : value;
 
         // Add user message
-        addMessage(value, 'user');
+        addMessage(finalValue, 'user');
         userInput.value = '';
         
         // Save response
         if (currentQuestionIndex < questions.length) {
             collectedData.responses.push({
-                question: questions[currentQuestionIndex].text,
+                question: questions[currentQuestionIndex].text.replace(/\*\*/g, '').replace(/\n/g, ' '),
                 question_id: questions[currentQuestionIndex].id,
-                answer: value,
+                answer: finalValue,
                 timestamp: new Date().toISOString()
             });
         }
@@ -533,7 +572,7 @@
     window.onload = () => {
         setTimeout(() => {
             addMessage("Hello! 👋 Thank you for attending the **AI Empowerment for Leaders** workshop with Mehul Nanavati. I'd love to hear your feedback—this will help us design even better programs! Let's begin:", 'bot', true);
-            setTimeout(askNextQuestion, 1500);
+            setTimeout(askNextQuestion, 1200);
         }, 500);
     };
 </script>

@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: feedback-survey-chatbot
+    runtime: python
+    buildCommand: |
+      cd backend && pip install -r requirements.txt
+    startCommand: cd backend && uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: NVIDIA_NIM_API_KEY
+        sync: false
+      - key: NVIDIA_NIM_MODEL
+        value: meta/llama-3.1-8b-instruct
+      - key: PYTHON_VERSION
+        value: 3.11.0
+
+  - type: static
+    name: feedback-survey-frontend
+    buildCommand: echo "Static site - no build needed"
+    staticPublishPath: ./frontend
+    routes:
+      - type: rewrite
+        source: /api/*
+        destination: https://feedback-survey-chatbot.onrender.com/api/*
